@@ -1,0 +1,44 @@
+#C code for the additon of matrix 
+#  void mm (INT N, DOUBLE* A, DOUBLE* B, DOUBLE* C ){ 
+#    int i, j; #   for (i = 0; i! = N; i = i + 1) 
+#        for (j = 0; j! = N; j = j + 1) 
+#            x[i][j] = x[i][j]+ y[i][j];} 
+mmult:  sub     $sp,$sp,12              # push two words on the stack         
+sw      $s0,0($sp)         
+sw      $s1,4($sp)         
+sw      $s4,8($sp)         
+li      $s0,0                   # i = 0 L1:     
+li      $s1,0                   # j = 0 L2:     
+li      $s2,0                   # k = 0 
+inner:  mul     $t0,$s1,$a3             # t0 = j*n         
+add     $t1,$s0,$t0             # t1= i+j*n         
+sll     $t1,$t1,3               # t1=8*(i+j*n)         
+add     $t2,$a2,$t1             # t2 = C[i+j*n]= c[i][j]         
+l.d     $f10,0($t2)             # load C[i][j]         
+mul     $t3,$s2,$a3             # t3 = k*n         
+add     $t4,$s0,$t3             # t4= i+k*n         
+sll     $t5,$t4,3               # t5=8*(i+k*n)         
+add     $t6,$a0,$t4             # t6 = A[i+k*n]=A[i][k]         
+l.d     $f4,0($t6)              # load A[i][k]         
+mul     $t7,$s1,$a3             # t7 = j*n         
+add     $t8,$s2,$t7             # t8= k+j*n         
+sll     $t9,$t8,3               # t9=8*(k+j*n)         
+add.d     $t10,$a1,$t9            # t10 = B[k+j*n]=B[k][j]         
+l.d     $f6,0($t10)             # load B[k][j]         
+add.d     $f8,$f4,$f6             # A[i][k] + B[k][j]        
+add.d     $f10,$f8,$zero          # C[i][j] = A[i][k] + B[k][j]       
+add     $s2,$s2,1               # k++ and test inner loop condit$         
+bne     $s2,$a3,inner           #         
+add     $t1,$t0,$s1             # i*n+j         
+sll     $t1,$t1,3               # 8*(i*n+j)        
+add     $s4,$t1,$a2             # address of C[i][j]         
+s.d    $f10,0($t2)             # store C[i][j]         
+add     $s1,$s1,1                       # j++ and test loop condition       
+bne     $s1,$a3,L2      
+add     $s0,$s0,1               # i++ and test loop condition       
+bne     $s0,$a3,L1 
+exit:   lw      $s0,0($sp)              # restore registers $s0,$s1  
+lw      $s1,4($sp)        
+lw      $s4,8($sp)        
+add     $sp,$sp,12              # pop stack       
+jr      $ra   
